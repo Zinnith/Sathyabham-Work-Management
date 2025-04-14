@@ -1,5 +1,5 @@
 const express = require('express');
-const mysql = require('mysql');
+const mysql = require('mysql2');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
 
@@ -11,7 +11,7 @@ app.use(cors());
 const db = mysql.createConnection({
     host: 'localhost',
     user: 'root',
-    password: 'Nishar-2005',  // Ensure this is correct
+    password: 'Tamizh004',  // Ensure this is correct
     database: 'workmanagement'
 });
 
@@ -56,7 +56,7 @@ app.post('/', (req, res) => {
         }
 
         // Compare hashed password (use correct column name 'Password' as per your DB)
-        bcrypt.compare(password, user.password, (err, match) => {
+        bcrypt.compare(password, user.Password, (err, match) => {
             if (err) {
                 console.error("❌ bcrypt Error:", err, user.userID);
                 return res.status(500).json({ error: 'Error verifying password' });

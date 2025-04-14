@@ -5,6 +5,7 @@ import { Folder, Upload, Share, Download, Trash, Menu, User,Bell,Eye } from "luc
 import { useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom"; // Import useParams to read URL parameters
 import "./file_page.css";
+import axios from "axios"; // Import axios
 import Logo from "./Bama.png";
 
 const notifications = [
@@ -17,7 +18,7 @@ const notifications = [
 
 
 const Filepage = () => {
-  const { folderName } = useParams(); // Read the folderName from URL parameters
+ 
   const [menuOpen, setMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [files, setFiles] = useState([]);
@@ -25,21 +26,119 @@ const Filepage = () => {
 
   const exampleFiles = [];
 
-  let navigate = useNavigate()
+  const navigate = useNavigate();
+
   const [showEditDeleteButtons, setShowEditDeleteButtons] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false); // State for notification popup
   const {heading,folder_name} = useParams()
+  const [selectedFile, setSelectedFile] = useState(null);
+
   /*const [menuOpen, setMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);*/
 
   const selector = useSelector(state=>state)
 
   useEffect(() => {
-    setFiles(exampleFiles);
-  }, [folderName]);
+    fetchFiles();
+  }, [folder_name]);
 
+  const fetchFiles = async () => {
+    try {
+      const response = await axios.get(`http://localhost:5003/files`);
+      setFiles(response.data);
+    } catch (error) {
+      console.error("Error fetching files:", error);
+    }
+  };
+
+  const handleFileUpload = async (event) => {
+    const file = event.target.files[0];
+  
+    if (!file) {
+      console.log("No file selected");
+      return;
+    }
+  
+    if (!heading || !folder_name) {
+      console.error("Department or subfolder is missing!");
+      return;
+    }
+  
+    console.log(`Uploading file to: uploads/${heading}/${folder_name}`);
+  
+    const formData = new FormData();
+    formData.append("file", file);
+  
+    try {
+      const response = await axios.post(`http://localhost:5003/upload/${heading}/${folder_name}`, formData);
+      console.log("Upload successful:", response.data);
+  
+      // Update UI immediately
+      setFiles(prevFiles => [...prevFiles, { name: file.name, size: file.size }]);
+    } catch (error) {
+      console.error("Error uploading file:", error.response?.data || error.message);
+    }
+  };
+  
+  
+  
+  const handleFileClick = (fileName) => {
+    setSelectedFile(fileName);
+    console.log("Selected File:", fileName);
+  };
+  
+
+  const handleFileDelete = async (fileName) => {
+    if (!fileName) {
+      console.error("No file selected for deletion.");
+      return;
+    }
+  
+    try {
+      const response = await axios.delete(`http://localhost:5003/files/${heading}/${folder_name}/${fileName}`);
+      console.log("File deleted:", response.data);
+  
+      // Remove deleted file from UI
+      setFiles(prevFiles => prevFiles.filter(file => file.name !== fileName));
+      setSelectedFile(null); // Reset selected file
+  
+    } catch (error) {
+      console.error("Error deleting file:", error.response?.data || error.message);
+    }
+  };
+  
+  
+
+  const handleFileDownload = async (fileName) => {
+    if (!fileName) {
+      console.error("No file selected for download.");
+      return;
+    }
+  
+    try {
+      const response = await axios.get(`http://localhost:5003/download/${heading}/${folder_name}/${fileName}`, {
+        responseType: "blob", // Important to get raw file data
+      });
+  
+      console.log("Download successful:", response);
+  
+      // Create URL for downloaded file
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", fileName); // Set correct file name
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+    } catch (error) {
+      console.error("Error downloading file:", error.response?.data || error.message);
+    }
+  };
+  
+  
   const handleStock =()=>{
     navigate('/stock')
   }
@@ -197,42 +296,57 @@ const Filepage = () => {
           </div><br></br><br></br>
           {quickActionsOpen && (
             <div className="action-buttons">
-              <button className="action-btn">
-                <Upload size={18} className="action-icon" /> Upload
-              </button>
-              <button className="action-btn">
-                <Share size={18} className="action-icon" /> Share
-              </button>
-              <button className="action-btn">
-                <Download size={18} className="action-icon" /> Download
-              </button>
+               <button className="action-btn">
+               <label htmlFor="file-upload" style={{ cursor: "pointer" }}>
+             <Upload size={18} className="action-icon" /> Upload
+             </label>
+          <input 
+             id="file-upload" 
+            type="file" 
+            style={{ display: "none" }} 
+           onChange={handleFileUpload} 
+         />
+          </button>
+
+          <button className="action-btn" onClick={() => alert("Share feature coming soon!")}>
+            <Share size={18} className="action-icon" /> Share
+          </button>
+          <button className="action-btn" onClick={() => selectedFile && handleFileDownload(selectedFile)}>
+            <Download size={18} className="action-icon" /> Download
+          </button>
+
               {/*<button className="action-btn">
                 <Eye size={18} className="action-icon" /> View
               </button>*/}
-              <button className="action-btn">
-                <Trash size={18} className="action-icon" /> Delete
-              </button>
+              <button className="action-btn" onClick={() => selectedFile && handleFileDelete(selectedFile)}>
+            <Trash size={18} className="action-icon" /> Delete
+          </button>
             </div>
           )}
         </div>
 
         <div className="file-container">
-          {files.length > 0 ? (
-            files.map((file, index) => (
-              <div key={index} className="file-card">
-                <Folder className="file-icon" size={20} />
-                <div className="file-details">
-                  <p className="file-name">{file.name}</p>
-                  <p className="file-size">{file.size}</p>
-                </div>
-              </div>
-            ))
-          ) : (
-            <p className="no-files-msg">No files in this folder.</p>
-          )}
-        </div>
+        {files.length > 0 ? (
+  files.map((file, index) => (
+    <div 
+      key={index} 
+      className={`file-card ${selectedFile === file.name ? 'selected' : ''}`} 
+      onClick={() => handleFileClick(file.name)}
+    >
+      <Folder className="file-icon" size={20} />
+      <div className="file-details">
+        <p className="file-name">{file.name}</p>
+        
       </div>
     </div>
+  ))
+) : (
+  <p className="no-files-msg">No files in this folder.</p>
+)}
+
+      </div>
+    </div>
+  </div>
   );
 };
 

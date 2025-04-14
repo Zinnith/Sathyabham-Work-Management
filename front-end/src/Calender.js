@@ -4,8 +4,17 @@ import { Menu, User, Bell } from "lucide-react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import * as XLSX from "xlsx";
+import { useEffect} from 'react';
 import Logo from './Bama.png';
 import "./Calender.css";
+const tranImages = [
+  require('./assets/Trans1.jpg'),
+  require('./assets/Trans2.jpg'),
+  require('./assets/Trans3.jpg'),
+  require('./assets/Trans4.jpg'),
+  require('./assets/Trans5.jpg'),
+  require('./assets/Trans6.jpg'),
+];
 
 const notifications = [
   { id: 1, text: "You have upcoming activities due", time: "26 days 15 hours ago" },
@@ -111,7 +120,18 @@ const Calender = () => {
   const noti_setting=()=>{
     navigate('/noti_setting')
   }
-
+  const [currentTranIndex, setCurrentTranIndex] = useState(0);
+  const [rotateY, setRotateY] = useState(0);
+  
+     
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentTranIndex((prevIndex) => (prevIndex + 1) % tranImages.length);
+      setRotateY((prevRotate) => prevRotate + 90); // Rotate cube-like
+    }, 1500); // Change every 3.5 seconds
+  
+    return () => clearInterval(interval);
+  }, []);
   return (
     <div className="app-container">
       {/* Header */}
@@ -121,6 +141,13 @@ const Calender = () => {
           <div className="logo-wrapper">
             <img src={Logo} alt="logo" className="logo-image" />
           </div>
+          <div className="Tran-container">
+    <div className="Tran-wrapper" style={{ transform: `rotateY(${rotateY}deg)` }}>
+      {tranImages.map((image, index) => (
+        <div key={index} className={`Tran-face face-${index}`} style={{ backgroundImage: `url(${image})` }}></div>
+      ))}
+    </div>
+    </div>
         </div>
 
         {menuOpen && (

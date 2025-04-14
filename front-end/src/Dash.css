@@ -33,10 +33,60 @@
   color: #f3a6b0;
 }
 
-.logo-wrapper {
+.logo-wrapper .Tran-wrapper {
   display: flex;
   align-items: center;
 }
+
+.Tran-container {
+  perspective: 1000px; /* Gives a 3D depth effect */
+  width: 10px; /* Reduced width */
+  height: 20px;/* Reduced height */
+  margin-left: 50px;
+  
+ 
+}
+
+.Tran-wrapper {
+  position: relative;
+  width: 20px; /* Cube size */
+  height: 20px;
+  transform-style: preserve-3d;
+  transition: transform 1s ease-in-out; /* Smooth transition */
+}
+
+.Tran-face {
+  position: absolute;
+  width: 100px; /* Reduced face size */
+  height: 100px;
+  background-size: contain; /* Ensures image fits inside */
+  background-repeat: no-repeat;
+  background-position: center;
+  backface-visibility: hidden; /* Hide the back face */
+  border-radius: 5px;
+}
+
+/* Adjust translateZ to fit smaller cube */
+.face-0 { transform: rotateY(0deg) translateZ(50px); }
+.face-1 { transform: rotateY(90deg) translateZ(50px); }
+.face-2 { transform: rotateY(180deg) translateZ(50px); }
+.face-3 { transform: rotateY(270deg) translateZ(50px); }
+.face-4 { transform: rotateX(90deg) translateZ(50px); }
+.face-5 { transform: rotateX(-90deg) translateZ(50px); }
+
+.tran-image {
+  width: 90%;
+  height: 90%;
+  object-fit: contain;
+}
+
+.Tran-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
 
 .logo-image {
   width: 200px;
@@ -357,7 +407,7 @@ p{
 
 .card-dash {
   margin-top: 40px;
-  background: rgb(243, 226, 226);
+  background: rgb(223, 216, 215);
   border-radius: 16px;
   padding: 0.3rem;
   text-align: center;

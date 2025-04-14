@@ -33,7 +33,14 @@ const recentActivities = [
   { name: "Created Q4 Analysis.xlsx", time: "4 hours ago" },
   { name: "Shared Project Timeline.docx", time: "6 hours ago" },
 ];
-
+const tranImages = [
+  require('./assets/Trans1.jpg'),
+  require('./assets/Trans2.jpg'),
+  require('./assets/Trans3.jpg'),
+  require('./assets/Trans4.jpg'),
+  require('./assets/Trans5.jpg'),
+  require('./assets/Trans6.jpg'),
+];
 const notifications = [
   { id: 1, text: "You have upcoming activities due", time: "26 days 15 hours ago" },
   { id: 2, text: "Maintenance task completed", time: "3 days ago" },
@@ -55,9 +62,9 @@ const DashboardM = (props) => {
   const cardData = [
     { label: "Department", count: "1500+" },
     { label: "Rooms", count: "1500+" },
-    { label: "Transport", count: "13" },
-    { label: "Teaching", count: "15" },
-    { label: "Non-Teaching", count: "150" },
+    { label: "Transport", count: "130+" },
+    { label: "Teaching", count: "250+" },
+    { label: "Non-Teaching", count: "150+" },
   ];
   /*function getData(users){
     setUser(users)
@@ -137,7 +144,45 @@ const DashboardM = (props) => {
     const noti_setting=()=>{
       navigate('/noti_setting')
     }
+    useEffect(() => {
+      const cards = document.querySelectorAll(".card-number-dash");
+  
+      let duration = 1500; // Animation time in ms
+      let frameRate = 20; // Update every 20ms
+      let totalFrames = duration / frameRate; // Number of frames
+  
+      cards.forEach((card, index) => {
+        let finalValue = parseInt(cardData[index].count.replace("+", ""), 10);
+        let hasPlus = cardData[index].count.includes("+");
+        let increment = Math.ceil(finalValue / totalFrames);
+        let currentValue = 0;
+  
+        const updateNumber = () => {
+          currentValue += increment;
+          if (currentValue >= finalValue) {
+            currentValue = finalValue; // Ensure it stops at the exact value
+            clearInterval(interval);
+          }
+          card.textContent = currentValue + (hasPlus ? "+" : "");
+        };
+  
+        let interval = setInterval(updateNumber, frameRate);
+      });
+    }, []);
+    const [currentTranIndex, setCurrentTranIndex] = useState(0);
+const [rotateY, setRotateY] = useState(0);
+
+   
+useEffect(() => {
+  const interval = setInterval(() => {
+    setCurrentTranIndex((prevIndex) => (prevIndex + 1) % tranImages.length);
+    setRotateY((prevRotate) => prevRotate + 90); // Rotate cube-like
+  }, 1500); // Change every 3.5 seconds
+
+  return () => clearInterval(interval);
+}, []);
     
+
 
   return (
     <div className="app-container">
@@ -174,6 +219,13 @@ const DashboardM = (props) => {
           <div className="logo-wrapper">
             <img src={Logo} alt="logo" className="logo-image" />
           </div>
+          <div className="Tran-container">
+    <div className="Tran-wrapper" style={{ transform: `rotateY(${rotateY}deg)` }}>
+      {tranImages.map((image, index) => (
+        <div key={index} className={`Tran-face face-${index}`} style={{ backgroundImage: `url(${image})` }}></div>
+      ))}
+    </div>
+    </div>
         </div>
 
         {/*<nav className="nav">

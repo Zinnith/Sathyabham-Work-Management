@@ -6,6 +6,16 @@ import { AiOutlineEdit, AiOutlineSetting } from "react-icons/ai"; // Import AiOu
 import "./Cs.css";
 import { useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
+import { TbEdit } from "react-icons/tb";
+
+const tranImages = [
+  require('./assets/TransDep1.jpg'),
+  require('./assets/TransDep2.jpg'),
+  require('./assets/TransDep3.jpg'),
+  require('./assets/TransDep4.jpg'),
+  require('./assets/TransDep5.jpg'),
+  require('./assets/TransDep6.jpg'),
+];
 
 const notifications = [
   { id: 1, text: "You have upcoming activities due", time: "26 days 15 hours ago" },
@@ -213,6 +223,20 @@ const Departments = () => {
     navigate('/noti_setting')
   }
 
+  const [currentTranIndex, setCurrentTranIndex] = useState(0);
+      const [rotateY, setRotateY] = useState(0);
+      
+         
+      useEffect(() => {
+        const interval = setInterval(() => {
+          setCurrentTranIndex((prevIndex) => (prevIndex + 1) % tranImages.length);
+          setRotateY((prevRotate) => prevRotate + 90); // Rotate cube-like
+        }, 1500); // Change every 3.5 seconds
+      
+        return () => clearInterval(interval);
+      }, []);
+          
+
   return (
     <div className="app-container">
       {/* Navbar */}
@@ -222,6 +246,13 @@ const Departments = () => {
           <div className="logo-wrapper">
             <img src={Logo} alt="logo" className="logo-image" />
           </div>
+          <div className="Tran-container">
+    <div className="Tran-wrapper" style={{ transform: `rotateY(${rotateY}deg)` }}>
+      {tranImages.map((image, index) => (
+        <div key={index} className={`Tran-face face-${index}`} style={{ backgroundImage: `url(${image})` }}></div>
+      ))}
+    </div>
+    </div>
         </div>
 
         {/*<nav className="nav">
@@ -316,10 +347,10 @@ const Departments = () => {
         </header>
 
         {/* Action Buttons Container */}
-        {selector.userDetails.dept=="CIVIL" && <div className="action-buttons-container-cs">
+        {selector.userDetails.position=="Admin" && <div className="action-buttons-container-cs">
           <div>
           <button className="pen-icon-button-cs" onClick={toggleEditDeleteButtons}>
-            <AiOutlineEdit size={24} />
+            <TbEdit size={24} />
           </button>
           </div>
           {showEditDeleteButtons && (
@@ -347,7 +378,7 @@ const Departments = () => {
                   {/* Edit and Delete Icons */}
                   {editMode && (
                     <button className="edit-icon-button-cs" onClick={() => handleEditEntry(index)}>
-                      ✏
+                       <TbEdit size={25} />
                     </button>
                   )}
                   {deleteMode && (

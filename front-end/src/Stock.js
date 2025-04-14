@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useEffect } from 'react';
 import "./Stock.css";
 import companyLogo from "./Bama.png";
 import computingImage from "./schoolofcomputing.jpg";
@@ -16,14 +17,23 @@ import { useSelector } from "react-redux";
 import Logo from './Bama.png';
 import { TbEdit } from "react-icons/tb";
 
+const tranImages = [
+  require('./assets/Trans1.jpg'),
+  require('./assets/Trans2.jpg'),
+  require('./assets/Trans3.jpg'),
+  require('./assets/Trans4.jpg'),
+  require('./assets/Trans5.jpg'),
+  require('./assets/Trans6.jpg'),
+];
+
 const initialSchools = [
-  { name: "SCHOOL OF COMPUTING", image: computingImage },
-  { name: "SCHOOL OF MECH", image: mechImage },
-  { name: "SCHOOL OF CIVIL", image: civilImage },
-  { name: "SCHOOL OF ARTS", image: artsImage },
-  { name: "SCHOOL OF LAW", image: lawImage },
-  { name: "SCHOOL OF ECE", image: eceImage },
-  { name: "SCHOOL OF EEE", image: eeeImage },
+  { name: "COMPUTER SCIENCE", image: computingImage},
+  { name: "MECHANICAL ENGINEERING", image: mechImage },
+  { name: "CIVIL ENGINEERING", image: civilImage },
+  { name: "BIOTECH", image: artsImage },
+  { name: "LAW", image: lawImage },
+  { name: "ELECTRONIC & COMMUNICATION ENGINEERING", image: eceImage },
+  { name: "ELECTRICAL & ELECTRONIC ENGINEERING", image: eeeImage },
 ];
 
 const notifications = [
@@ -51,6 +61,7 @@ const Stock = () => {
   const [notificationsOpen, setNotificationsOpen] = useState(false)
   const selector = useSelector(state=>state)
   let navigate = useNavigate()
+  console.log(selector.userDetails.position)
   const filteredSchools = schools.filter((school) =>
     school.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -100,7 +111,6 @@ const Stock = () => {
       name: updatedName,
     };
    setSchools(updatedSchools);
-    setSchools(updatedSchools);
     setEditingSchool(null); // Exit edit mode
   };
 
@@ -142,7 +152,7 @@ const Stock = () => {
     setNotificationsOpen(!notificationsOpen);
   };
 
-  const handleCard=(name)=>{
+  const handleCard=(schoolName)=>{
     /*if (name=='SCHOOL OF COMPUTING'){
       navigate('/cs')
     }
@@ -164,12 +174,20 @@ const Stock = () => {
     else if(name=='SCHOOL OF EEE'){
       navigate('/eee')
     }*/
-   navigate(`/departments/${name}`)
+    navigate(`/departments/${schoolName}`)
+  
+      
     
   }
 
   const handleStock =()=>{
-    navigate('/stock')
+    if (selector.userDetails.role=="Admin"){
+      navigate(`/departments/${selector.userDetails.dept}`)
+    }
+    else{
+      navigate('/stock')
+    }
+    
   }
   const handleReport=()=>{
     navigate('/report')
@@ -214,6 +232,20 @@ const Stock = () => {
   const noti_setting=()=>{
     navigate('/noti_setting')
   }
+  
+  const [currentTranIndex, setCurrentTranIndex] = useState(0);
+  const [rotateY, setRotateY] = useState(0);
+  
+     
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentTranIndex((prevIndex) => (prevIndex + 1) % tranImages.length);
+      setRotateY((prevRotate) => prevRotate + 90); // Rotate cube-like
+    }, 1500); // Change every 3.5 seconds
+  
+    return () => clearInterval(interval);
+  }, []);
+      
 
   return (
     <div className="app-container-stock">
@@ -224,6 +256,13 @@ const Stock = () => {
           <div className="logo-wrapper">
             <img src={Logo} alt="logo" className="logo-image" />
           </div>
+          <div className="Tran-container">
+    <div className="Tran-wrapper" style={{ transform: `rotateY(${rotateY}deg)` }}>
+      {tranImages.map((image, index) => (
+        <div key={index} className={`Tran-face face-${index}`} style={{ backgroundImage: `url(${image})` }}></div>
+      ))}
+    </div>
+    </div>
         </div>
 
         {/*<nav className="nav">
@@ -237,8 +276,8 @@ const Stock = () => {
         <nav className="nav">
           <ul type="none" className='nav'>
             <button className='nav-link' onClick={handleHome}>Home</button>
-            <button className='nav-link' onClick={handleStock}>Stock</button>
-            {selector.userDetails.dept!=='CSE' && selector.userDetails.dept!=='ECE' && <button className='nav-link' onClick={handleMain}>Maintenance</button>}
+            {selector.userDetails.role!="End-User" && <button className='nav-link' onClick={handleStock}>Stock</button>}
+            {selector.userDetails.role!=="Admin" && selector.userDetails.role!="End-User" && <button className='nav-link' onClick={handleMain}>Maintenance</button>}
             <button className='nav-link' onClick={handleReport}>Report</button>
             {/*<button className='nav-link' onClick={handleInfo}>Notification</button>*/}
           </ul>
@@ -307,8 +346,8 @@ const Stock = () => {
       {/* Action Buttons Container */}
       {selector.userDetails.position=="Super-Admin" && <div className="action-buttons-container-stock">
         <button className="pen-icon-stock" onClick={toggleEditDeleteButtons}>
-          <TbEdit size={35} />
-          </button>
+          <TbEdit size={34} />
+        </button>
         {showEditDeleteButtons && (
           <div className="action-buttons-stock">
             <button className="add-button-stock" onClick={handleAddButtonClick}>
@@ -401,42 +440,6 @@ const Stock = () => {
   </>
 )}
 
-              {/* Pen Icon for Editing */}
-              {editMode && (
-                <button className="pen-icon-button-stock" onClick={() => handlePenIconClick(index)}>
-                  <AiOutlineEdit size={20} />
-                </button>
-              )}
-              {/* Minus Icon for Deleting */}
-              {deleteMode && (
-                <button className="minus-icon-button-stock" onClick={() => handleMinusIconClick(index)}>
-                  <AiOutlineMinus size={20} />
-                </button>
-              )}
-              {/* Edit Form */}
-              {editingSchool === index ? (
-                <div className="edit-form">
-                  <input
-                    type="text"
-                    value={school.name}
-                    onChange={(e) => {
-                      const updatedSchools = [...schools];
-                      updatedSchools[index].name = e.target.value;
-                      setSchools(updatedSchools);
-                    }}
-                  />
-                  <button onClick={() => handleSaveEdit(index, school.name)}>Save</button>
-                  <button onClick={() => setEditingSchool(null)}>Cancel</button>
-                </div>
-              ) : (
-                <>
-                  <div
-                    className="card-image"
-                    style={{ backgroundImage: `url(${school.image}) `}}
-                  ></div>
-                  <div className="card-footer">{school.name}</div>
-                </>
-              )}
             </div>
           ))
         ) : (

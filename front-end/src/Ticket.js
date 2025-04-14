@@ -6,6 +6,18 @@ import { AiOutlineMenu, AiOutlineClose, AiOutlinePlus, AiOutlineEdit, AiOutlineC
 import { Folder, Upload, Share, Download, Trash, Menu, User,Bell,Edit,Trash2 } from "lucide-react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { useEffect } from "react";
+
+const tranImages = [
+  require('./assets/Trans1.jpg'),
+  require('./assets/Trans2.jpg'),
+  require('./assets/Trans3.jpg'),
+  require('./assets/Trans4.jpg'),
+  require('./assets/Trans5.jpg'),
+  require('./assets/Trans6.jpg'),
+];
+
 
 const notifications = [
   { id: 1, text: "You have upcoming activities due", time: "26 days 15 hours ago" },
@@ -18,7 +30,7 @@ const Ticket = () => {
   const [profileOpen, setProfileOpen] = useState(false);
   const [tickets, setTickets] = useState([]);
   const [editIndex, setEditIndex] = useState(null);
-  let navigate = useNavigate()
+  const navigate = useNavigate()
   const [showEditDeleteButtons, setShowEditDeleteButtons] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
@@ -29,48 +41,128 @@ const Ticket = () => {
   const selector = useSelector(state=>state)
   const [ticket, setTicket] = useState({
     department: "",
-    ticketImage: null,
+    ticketImage: "",
     block: "",
     description: "",
     priority: "",
     assignedTo: "",
   });
 
+  const fetchTickets = async () => {
+    try {
+        const response = await axios.get("http://localhost:5000/tickets");
+
+        // Get frontend-only data from local storage
+        const localTickets = JSON.parse(localStorage.getItem("localTickets")) || [];
+
+        // Merge backend data with stored frontend-only data
+        const mergedTickets = response.data.map((ticket, index) => ({
+            ...ticket,
+            block: localTickets[index]?.block || "N/A",
+            priority: localTickets[index]?.priority || "N/A",
+            assignedTo: localTickets[index]?.assignedTo || "N/A",
+            ticketImage: localTickets[index]?.ticketImage || "",
+        }));
+
+        setTickets(mergedTickets);
+    } catch (error) {
+        console.error("Error fetching tickets:", error);
+    }
+};
+
+
+  useEffect(() => {
+    fetchTickets();
+  }, []);
+
+
   const handleInputChange = (e) => {
     setTicket({ ...ticket, [e.target.name]: e.target.value });
   };
 
-  const handleFileChange = (e) => {
-    setTicket({ ...ticket, ticketImage: URL.createObjectURL(e.target.files[0]) });
-  };
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (editIndex !== null) {
-      const updatedTickets = [...tickets];
-      updatedTickets[editIndex] = ticket;
-      setTickets(updatedTickets);
-      setEditIndex(null);
-    } else {
-      setTickets([...tickets, ticket]);
+
+    // Data sent to backend
+    const ticketData = {
+        raised_by: selector.userDetails?.name?.trim() || "",
+        department: ticket.department?.trim() || "",
+        ticket_description: ticket.description?.trim() || "",
+        status: "Pending",
+    };
+
+    if (!ticketData.raised_by || !ticketData.department || !ticketData.ticket_description) {
+        alert("All fields are required!");
+        return;
     }
-    setTicket({
-      department: "",
-      ticketImage: null,
-      block: "",
-      description: "",
-      priority: "",
-      assignedTo: "",
-    });
-  };
+
+    try {
+        const config = { headers: { "Content-Type": "application/json" } };
+
+        if (editIndex !== null) {
+            await axios.put(`http://localhost:5000/tickets/${tickets[editIndex].id}`, ticketData, config);
+        } else {
+            await axios.post("http://localhost:5000/tickets", ticketData, config);
+        }
+
+        // Store frontend-only data in local storage
+        const localTickets = JSON.parse(localStorage.getItem("localTickets")) || [];
+        localTickets.push({
+            block: ticket.block,
+            priority: ticket.priority,
+            assignedTo: ticket.assignedTo,
+            ticketImage: ticket.ticketImage,
+        });
+
+        localStorage.setItem("localTickets", JSON.stringify(localTickets));
+
+        fetchTickets();  // Refresh tickets from backend
+        setEditIndex(null);
+
+        // Reset form while keeping frontend values
+        setTicket({
+            department: "",
+            description: "",
+            block: ticket.block,
+            priority: ticket.priority,
+            assignedTo: ticket.assignedTo,
+            ticketImage: ticket.ticketImage,
+        });
+
+        alert("✅ Ticket submitted successfully!");
+    } catch (error) {
+        console.error("❌ Error submitting ticket:", error);
+        alert("Failed to submit ticket. Please try again.");
+    }
+};
+
+const handleFileChange = (e) => {
+  const file = e.target.files[0];
+  if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+          setTicket({ ...ticket, ticketImage: reader.result }); // Store Base64 image
+      };
+      reader.readAsDataURL(file);
+  }
+};
+
 
   const handleEdit = (index) => {
     setEditIndex(index);
     setTicket(tickets[index]);
   };
 
-  const handleDelete = (index) => {
-    setTickets(tickets.filter((_, i) => i !== index));
+   // 🔹 **Delete Ticket**
+   const handleDelete = async (index) => {
+    try {
+      await axios.delete(`http://localhost:5000/tickets/${tickets[index].id}`);
+      fetchTickets();
+      alert("Ticket deleted successfully!");
+    } catch (error) {
+      console.error("Error deleting ticket:", error);
+      alert("Failed to delete ticket.");
+    }
   };
 
   const handleStock =()=>{
@@ -127,17 +219,38 @@ const Ticket = () => {
   const noti_setting=()=>{
     navigate('/noti_setting')
   }
+  
+  const [currentTranIndex, setCurrentTranIndex] = useState(0);
+  const [rotateY, setRotateY] = useState(0);
+  
+     
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentTranIndex((prevIndex) => (prevIndex + 1) % tranImages.length);
+      setRotateY((prevRotate) => prevRotate + 90); // Rotate cube-like
+    }, 1500); // Change every 3.5 seconds
+  
+    return () => clearInterval(interval);
+  }, []);
+
 
   return (
-    <div className="app-container-ticket">
-      {/* Navbar */}
-      <header className="header">
-        <div className="left-section">
-          <Menu className="menu-icon" size={28} onClick={() => setMenuOpen(!menuOpen)} />
-          <div className="logo-wrapper">
-            <img src={Logo} alt="logo" className="logo-image" />
-          </div>
+    <div className="app-container">
+          {/* Navbar */}
+          <header className="header">
+          <div className="left-section">
+            <Menu className="menu-icon" size={28} onClick={() => setMenuOpen(!menuOpen)} />
+            <div className="logo-wrapper">
+              <img src={Logo} alt="logo" className="logo-image" />
+            </div>
+            <div className="Tran-container">
+        <div className="Tran-wrapper" style={{ transform: `rotateY(${rotateY}deg)` }}>
+          {tranImages.map((image, index) => (
+            <div key={index} className={`Tran-face face-${index}`} style={{ backgroundImage: `url(${image})` }}></div>
+          ))}
         </div>
+        </div>
+          </div>
 
         {/*<nav className="nav">
           {["Dashboard","Service","Report","News"].map((link, index) => (
@@ -231,14 +344,14 @@ const Ticket = () => {
             ) : (
               tickets.map((tkt, index) => (
                 <div key={index} className="ticket-card">
-                  {tkt.ticketImage && <img src={tkt.ticketImage} alt="Ticket" className="ticket-image" />}
-                  <div className="ticket-info">
-                    <p><strong>Dept:</strong> {tkt.department}</p>
-                    <p><strong>Block:</strong> {tkt.block}</p>
-                    <p><strong>Desc:</strong> {tkt.description}</p>
-                    <p><strong>Priority:</strong> {tkt.priority}</p>
-                    <p><strong>Assign:</strong> {tkt.assignedTo}</p>
-                  </div>
+                    {tkt.ticketImage && <img src={tkt.ticketImage} alt="Ticket" className="ticket-image" />}
+               <div className="ticket-info">
+               <p><strong>Dept:</strong> {tkt.department || "N/A"}</p>
+            <p><strong>Block:</strong> {tkt.block || "N/A"}</p>
+            <p><strong>Desc:</strong> {tkt.ticket_description || "N/A"}</p>
+            <p><strong>Priority:</strong> {tkt.priority || "N/A"}</p>
+            <p><strong>Assign:</strong> {tkt.assignedTo || "N/A"}</p>
+               </div>
                   <div className="ticket-actions">
                     <Edit className="edit-icon" size={20} onClick={() => handleEdit(index)} />
                     <Trash2 className="delete-icon" size={20} onClick={() => handleDelete(index)} />

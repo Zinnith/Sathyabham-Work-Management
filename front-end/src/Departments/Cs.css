@@ -343,3 +343,20 @@ table th {
   margin: 30px 115px;
   outline: none;
 }
+
+.edit-icon-button-cs {  
+   margin-left: 250px;
+   color: #831238;
+   background-color: white;
+   border: white;
+
+}
+
+.delete-icon-button-cs{
+   margin-left: 250px;
+   color: #831238;
+   background-color: white;
+   border: white;
+   font-size: 24px;
+
+}

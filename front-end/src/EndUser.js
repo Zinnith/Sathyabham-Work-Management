@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Bell, Menu, User } from "lucide-react"; // Import icons
 import Logo from "./Bama.png"; // Update with actual path to logo
 import "./EndUser.css";
+import { useEffect} from 'react';
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { AiOutlineSetting } from "react-icons/ai";
@@ -11,7 +12,14 @@ const notifications = [
   { id: 2, text: "Maintenance task completed", time: "3 days ago" },
   { id: 3, text: "New request received", time: "1 hour ago" }
 ];
-
+const tranImages = [
+  require('./assets/Trans1.jpg'),
+  require('./assets/Trans2.jpg'),
+  require('./assets/Trans3.jpg'),
+  require('./assets/Trans4.jpg'),
+  require('./assets/Trans5.jpg'),
+  require('./assets/Trans6.jpg'),
+];
 const Enduser = ({ tickets = [], updateTicketStatus }) => {
   const [confirmComplete, setConfirmComplete] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -77,7 +85,18 @@ const Enduser = ({ tickets = [], updateTicketStatus }) => {
   const noti_setting=()=>{
     navigate('/noti_setting')
   }
-
+  const [currentTranIndex, setCurrentTranIndex] = useState(0);
+  const [rotateY, setRotateY] = useState(0);
+  
+     
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentTranIndex((prevIndex) => (prevIndex + 1) % tranImages.length);
+      setRotateY((prevRotate) => prevRotate + 90); // Rotate cube-like
+    }, 1500); // Change every 3.5 seconds
+  
+    return () => clearInterval(interval);
+  }, []);
   return (
     <div className="app-container">
       {/* Navbar */}
@@ -87,6 +106,13 @@ const Enduser = ({ tickets = [], updateTicketStatus }) => {
           <div className="logo-wrapper">
             <img src={Logo} alt="logo" className="logo-image" />
           </div>
+          <div className="Tran-container">
+    <div className="Tran-wrapper" style={{ transform: `rotateY(${rotateY}deg)` }}>
+      {tranImages.map((image, index) => (
+        <div key={index} className={`Tran-face face-${index}`} style={{ backgroundImage: `url(${image})` }}></div>
+      ))}
+    </div>
+    </div>
         </div>
 
         {/*<nav className="nav">

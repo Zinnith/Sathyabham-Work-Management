@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useEffect } from 'react';
 import Logo from './Bama.png';
 import "./Maintenance.css";
 import { AiOutlineEdit, AiOutlineMinus, AiOutlineCheck, AiOutlineSetting } from "react-icons/ai";
@@ -15,6 +16,14 @@ import {
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 
+const tranImages = [
+  require('./assets/Trans1.jpg'),
+  require('./assets/Trans2.jpg'),
+  require('./assets/Trans3.jpg'),
+  require('./assets/Trans4.jpg'),
+  require('./assets/Trans5.jpg'),
+  require('./assets/Trans6.jpg'),
+];
 // Departments Data (initial state)
 const initialDepartments = [
   { name: "IT Support", description: "Computer & Network Issues", icon: <MdComputer /> },
@@ -241,6 +250,20 @@ const Maintenance = () => {
     navigate('/noti_setting')
   }
 
+  const [currentTranIndex, setCurrentTranIndex] = useState(0);
+    const [rotateY, setRotateY] = useState(0);
+    
+       
+    useEffect(() => {
+      const interval = setInterval(() => {
+        setCurrentTranIndex((prevIndex) => (prevIndex + 1) % tranImages.length);
+        setRotateY((prevRotate) => prevRotate + 90); // Rotate cube-like
+      }, 1500); // Change every 3.5 seconds
+    
+      return () => clearInterval(interval);
+    }, []);
+        
+
   return (
     <div className="app-container">
         <header className="header">
@@ -249,6 +272,13 @@ const Maintenance = () => {
           <div className="logo-wrapper">
             <img src={Logo} alt="logo" className="logo-image" />
           </div>
+          <div className="Tran-container">
+    <div className="Tran-wrapper" style={{ transform: `rotateY(${rotateY}deg)` }}>
+      {tranImages.map((image, index) => (
+        <div key={index} className={`Tran-face face-${index}`} style={{ backgroundImage: `url(${image})` }}></div>
+      ))}
+    </div>
+    </div>
         </div>
 
         {/*<nav className="nav">

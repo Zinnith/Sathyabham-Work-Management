@@ -337,7 +337,6 @@
 }
 
 /* Edit and Delete Icons */
-.pen-icon-button-stock,
 .minus-icon-button-stock {
   position: absolute;
   top: 10px;
@@ -356,6 +355,9 @@
   top: 100px; /* Adjust to your needs */
   right: 20px;
   z-index: 1000;
+  background-color: transparent;
+  border: transparent;
+  color: #831238;
 }
 
 /* Edit Form */

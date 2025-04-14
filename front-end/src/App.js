@@ -22,8 +22,7 @@ import { PersistGate } from 'redux-persist/integration/react';
 import Departments from './Departments/Departments.js';
 import Filepage from './Filepage.js';
 import Services from './Services.js';
-
-
+import Po from './PO.js';
 
 function App() {
   return (
@@ -49,6 +48,7 @@ function App() {
               <Route path='/container' element={<Container/>}></Route>
               <Route path='/ticket' element={<Ticket/>}></Route>
               <Route path='/notification' element={<Notification/>}></Route>
+              <Route path='/purchase-order' element={<Po />} />
               <Route path='/calender' element={<Calender/>}></Route>
               <Route path='/noti_setting' element={<Notification_setting/>}></Route>
               

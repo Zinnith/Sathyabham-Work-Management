@@ -4,11 +4,20 @@ import { AiOutlineMenu, AiOutlineClose, AiOutlinePlus, AiOutlineEdit, AiOutlineC
 import { Folder, Upload, Share, Download, Trash, Menu, User,Bell,Settings } from "lucide-react";
 import { useSelector } from "react-redux";
 import Logo from './Bama.png';
+import { useEffect} from 'react';
+import { FaFileAlt, FaFileInvoice, FaFileSignature, FaBoxes } from "react-icons/fa";
 //import Logo from "./assets/Sathyaa.png";
 import DefaultProfileIcon from "./assets/profile.jpg";
 import "./Notification.css";
 import { useNavigate } from "react-router-dom";
-
+const tranImages = [
+  require('./assets/Trans1.jpg'),
+  require('./assets/Trans2.jpg'),
+  require('./assets/Trans3.jpg'),
+  require('./assets/Trans4.jpg'),
+  require('./assets/Trans5.jpg'),
+  require('./assets/Trans6.jpg'),
+];
 const notifications = [
   { id: 1, text: "You have upcoming activities due", time: "26 days 15 hours ago" },
   { id: 2, text: "Maintenance task completed", time: "3 days ago" },
@@ -16,6 +25,7 @@ const notifications = [
 ];
 
 const Notification = () => {
+  
   let navigate = useNavigate()
   const selector = useSelector(state=>state)
   const [menuOpen, setMenuOpen] = useState(false);
@@ -96,6 +106,44 @@ const Notification = () => {
   const noti_setting=()=>{
     navigate('/noti_setting')
   }
+
+  const handlePurchaseOrder = () => {
+    navigate('/purchase-order'); // Adjust the route as needed
+  };
+  
+  const handleBills = () => {
+    navigate('/bills'); // Adjust the route as needed
+  };
+  
+  const handleBillGenerate = () => {
+    navigate('/bill-generate'); // Adjust the route as needed
+  };
+  
+  const handleStockManagement = () => {
+    navigate('/stock-management'); // Adjust the route as needed
+  };
+  
+  // ✅ Move services array BELOW function definitions
+  const services = [
+    { id: 1, title: "Purchase Order", subtitle: "Manage POs", icon: <FaFileAlt className="service-icon" />, action: handlePurchaseOrder },
+    { id: 2, title: "Bills", subtitle: "Track Expenses", icon: <FaFileInvoice className="service-icon" />, action: handleBills },
+    { id: 3, title: "Bill Generate", subtitle: "Create Invoices", icon: <FaFileSignature className="service-icon" />, action: handleBillGenerate },
+    { id: 4, title: "Stock", subtitle: "Inventory Control", icon: <FaBoxes className="service-icon" />, action: handleStockManagement },
+  ];
+  
+ 
+  const [currentTranIndex, setCurrentTranIndex] = useState(0);
+  const [rotateY, setRotateY] = useState(0);
+  
+     
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentTranIndex((prevIndex) => (prevIndex + 1) % tranImages.length);
+      setRotateY((prevRotate) => prevRotate + 90); // Rotate cube-like
+    }, 1500); // Change every 3.5 seconds
+  
+    return () => clearInterval(interval);
+  }, []);
   return (
     <div className="app-container-noti">
       <header className="header">
@@ -104,6 +152,13 @@ const Notification = () => {
           <div className="logo-wrapper">
             <img src={Logo} alt="logo" className="logo-image" />
           </div>
+          <div className="Tran-container">
+    <div className="Tran-wrapper" style={{ transform: `rotateY(${rotateY}deg)` }}>
+      {tranImages.map((image, index) => (
+        <div key={index} className={`Tran-face face-${index}`} style={{ backgroundImage: `url(${image})` }}></div>
+      ))}
+    </div>
+    </div>
         </div>
          
         {/*<nav className="nav">
@@ -184,11 +239,15 @@ const Notification = () => {
         )}
       </header>
 
-      <div className="noti-div">
-        <p className="Noti">No Notifiction</p>
+      <div className="services-container">
+    {services.map((service) => (
+      <div key={service.id} className="service-card" onClick={service.action}>
+        {service.icon}
+        <h3>{service.title}</h3>
+        <p>{service.subtitle}</p>
       </div>
-      
-      
+    ))}
+  </div>
       <footer className="footer-noti">
         <div className="footer-section">
           <h3>Contact Us</h3>
@@ -217,3 +276,4 @@ const Notification = () => {
 };
 
 export default Notification;
+

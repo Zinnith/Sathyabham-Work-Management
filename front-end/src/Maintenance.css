@@ -751,3 +751,10 @@ p{
 .popup-content button:last-of-type:hover {
   background-color: #e53935;
 }
+
+.pen-icon-button{
+  margin-left: 200px;
+   color: #831238;
+   background-color: white;
+   border: white;
+}
